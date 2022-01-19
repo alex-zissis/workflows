@@ -45,7 +45,7 @@ jobs:
               uses: aws-actions/amazon-ecr-login@v1
 
             - name: Build, tag, and push image to Amazon ECR
-              uses: ./.github/actions/my-action@v1
+              uses: ./.github/actions/build-and-push-container@v1
               id: build-image
               with: 
                   image-tag: ${{ inputs.image-tag }}
@@ -53,47 +53,26 @@ jobs:
                   ecr-registry: ${{ inputs.ecr-registry }}
 
             - name: Update service
+              uses: ./.github/actions/update-service@v1
               with:
-                ECS_CLUSER: ${{ inputs.ecs-cluster }}
-                APPLICATION_NAME: ${{ inputs.application-name }}
-              run: |
-                  aws --no-cli-pager ecs update-service --cluster $ECS_CLUSTER --service $APPLICATION_NAME --force-new-deployment
-                  echo "Service ${APPLICATION_NAME} on cluster ${ECS_CLUSTER} updated"
+                ecs-cluster: ${{ inputs.ecs-cluster }}
+                application-name: ${{ inputs.application-name }}
 
             - name: Healthcheck
+              uses: ./.github/actions/perform-healthcheck@v1
               with:
-                  SHA: ${{ inputs.image-tag }}
-                  HEALTHCHECK_URL: ${{ inputs.healthcheck-url }}
+                  sha: ${{ inputs.image-tag }}
+                  healthcheck-url: ${{ inputs.healthcheck-url }}
 
-              run: |
-                  echo "Sleeping to give container a chance to boot 😴"
-                  sleep 20
-                  RESPONSE_SHA="null"
-                  MAX_ATTEMPTS="20"
-                  i=0
-                  while [ "$RESPONSE_SHA" != "$SHA" ] && [[ "$i" -lt "$MAX_ATTEMPTS" ]]; do
-                    sleep 10
-                    RESPONSE_SHA=$(curl -s $HEALTHCHECK_URL | jq -r .SHA)
-                    i=$((i+1))
-                    echo "attempt $i: $RESPONSE_SHA == $SHA"
-                  done
+            # - name: Cleanup unused images
+            #   run: |
+            #       export AWS_PAGER=cat
+            #       arr=$(aws ecr describe-images --repository-name $APPLICATION_NAME --no-paginate | jq -r '.imageDetails |= sort_by(.imagePushedAt) | .imageDetails[0:-2] | .[].imageDigest')
+            #       toDelete=$(node -e "console.log(process.argv[1].split('\n').filter(x => x.trim() !== '').map(x => 'imageDigest=' + x).join(' '))" "${arr[*]}")
+            #       if [[ "$toDelete" -eq "" ]]; then
+            #         echo "no old images to delete from ECS."
+            #         exit 0
+            #       fi
 
-                  if [[ "$i" -eq "$MAX_ATTEMPTS" ]]; then
-                    echo "Fail: Could not complete healthcheck"
-                    exit 1
-                  fi
-
-                  echo "Success: SHA recieved - ${SHA}"
-
-            - name: Cleanup unused images
-              run: |
-                  export AWS_PAGER=cat
-                  arr=$(aws ecr describe-images --repository-name $APPLICATION_NAME --no-paginate | jq -r '.imageDetails |= sort_by(.imagePushedAt) | .imageDetails[0:-2] | .[].imageDigest')
-                  toDelete=$(node -e "console.log(process.argv[1].split('\n').filter(x => x.trim() !== '').map(x => 'imageDigest=' + x).join(' '))" "${arr[*]}")
-                  if [[ "$toDelete" -eq "" ]]; then
-                    echo "no old images to delete from ECS."
-                    exit 0
-                  fi
-
-                  echo "deleting: $toDelete"
-                  aws ecr --no-paginate batch-delete-image --repository-name $APPLICATION_NAME --image-ids $toDelete
+            #       echo "deleting: $toDelete"
+            #       aws ecr --no-paginate batch-delete-image --repository-name $APPLICATION_NAME --image-ids $toDelete
