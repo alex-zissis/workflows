@@ -30889,11 +30889,11 @@ const client = new ECRClient();
             return;
         }
 
-        const imagesInAscendingOrder = response.imageDetails.sort((a, b) =>
+        const imagesInAscendingOrder = describeResponse.imageDetails.sort((a, b) =>
             a.imagePushedAt > b.imagePushedAt ? 1 : b.imagePushedAt > a.imagePushedAt ? -1 : 0
         );
 
-        if (images > 2) {
+        if (imagesInAscendingOrder > 2) {
             const imagesToDelete = imagesInAscendingOrder
                 .slice(0, -2)
                 .map((image) => ({imageDigest: `imageDigest=${image.imageDigest}`}));
