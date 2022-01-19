@@ -1,0 +1,9 @@
+name: 'Delete old ECR images'
+description: 'Deletes all but the two most recent ECR images'
+inputs:
+  ecr-repository-name:  # id of input
+    description: 'The name of the ECR Repository'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

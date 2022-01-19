@@ -1,109 +1,74 @@
 name: Build and deploys a container to ECS
 on:
     workflow_call:
-      inputs:
-        application-name:
-          required: true
-          type: string
-        ecs-cluster:
-          required: true
-          type: string
-        aws-region:
-          default: ap-southeast-2
-          type: string
-          required: false
-        image-tag:
-          required: true
-          type: string
-        healthcheck-url:
-          required: true
-          type: string
-      secrets:
-        aws-access-key-id:
-          required: true
-        aws-secret-access-key:
-          required: true
+        inputs:
+            application-name:
+                required: true
+                type: string
+            ecs-cluster:
+                required: true
+                type: string
+            aws-region:
+                default: ap-southeast-2
+                type: string
+                required: false
+            image-tag:
+                required: true
+                type: string
+            healthcheck-url:
+                required: true
+                type: string
+            ecr-registry:
+                required: true
+                type: string
+
+        secrets:
+            aws-access-key-id:
+                required: true
+            aws-secret-access-key:
+                required: true
 
 jobs:
     deploy:
-        name: Deploy to production
+        name: Deploy to ECS
         runs-on: ubuntu-latest
-        environment: production
 
         steps:
-            - name: Checkout
-              uses: actions/checkout@v2
-
             - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@v1
               with:
                   aws-access-key-id: ${{ secrets.aws-access-key-id }}
-                  aws-secret-access-key: ${{ secrets.aws-access-key-id }}
+                  aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
                   aws-region: ${{ inputs.aws-region }}
 
             - name: Login to Amazon ECR
               id: login-ecr
               uses: aws-actions/amazon-ecr-login@v1
 
+            - name: Checkout
+              uses: actions/checkout@v2
+
             - name: Build, tag, and push image to Amazon ECR
+              uses: alex-zissis/workflows/.github/actions/build-and-push-container@develop
               id: build-image
-              with: 
-                  IMAGE_TAG: ${{ inputs.image-tag }}
-                  APPLICATION_NAME: ${{ inputs.application-name }}
-              env:
-                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-              run: |
-                  echo $IMAGE_TAG
-                  # Build a docker container and
-                  # push it to ECR so that it can
-                  # be deployed to ECS.
-                  cd examples/express-app
-                  docker build --build-arg COMMIT_SHA=$IMAGE_TAG -t $ECR_REGISTRY/$APPLICATION_NAME:$IMAGE_TAG -t $ECR_REGISTRY/$APPLICATION_NAME:latest .
-                  docker push $ECR_REGISTRY/$APPLICATION_NAME --all-tags
-                  echo "::set-output name=image::$ECR_REGISTRY/$APPLICATION_NAME:$IMAGE_TAG"
+              with:
+                  image-tag: ${{ inputs.image-tag }}
+                  application-name: ${{ inputs.application-name }}
+                  ecr-registry: ${{ inputs.ecr-registry }}
 
             - name: Update service
+              uses: alex-zissis/workflows/.github/actions/update-service@develop
               with:
-                ECS_CLUSER: ${{ inputs.ecs-cluster }}
-                APPLICATION_NAME: ${{ inputs.application-name }}
-              run: |
-                  aws --no-cli-pager ecs update-service --cluster $ECS_CLUSTER --service $APPLICATION_NAME --force-new-deployment
-                  echo "Service ${APPLICATION_NAME} on cluster ${ECS_CLUSTER} updated"
+                  ecs-cluster: ${{ inputs.ecs-cluster }}
+                  application-name: ${{ inputs.application-name }}
 
             - name: Healthcheck
+              uses: alex-zissis/workflows/.github/actions/perform-healthcheck@develop
               with:
-                  SHA: ${{ inputs.image-tag }}
-                  HEALTHCHECK_URL: ${{ inputs.healthcheck-url }}
+                  sha: ${{ inputs.image-tag }}
+                  healthcheck-url: ${{ inputs.healthcheck-url }}
 
-              run: |
-                  echo "Sleeping to give container a chance to boot 😴"
-                  sleep 20
-                  RESPONSE_SHA="null"
-                  MAX_ATTEMPTS="20"
-                  i=0
-                  while [ "$RESPONSE_SHA" != "$SHA" ] && [[ "$i" -lt "$MAX_ATTEMPTS" ]]; do
-                    sleep 10
-                    RESPONSE_SHA=$(curl -s $HEALTHCHECK_URL | jq -r .SHA)
-                    i=$((i+1))
-                    echo "attempt $i: $RESPONSE_SHA == $SHA"
-                  done
-
-                  if [[ "$i" -eq "$MAX_ATTEMPTS" ]]; then
-                    echo "Fail: Could not complete healthcheck"
-                    exit 1
-                  fi
-
-                  echo "Success: SHA recieved - ${SHA}"
-
-            - name: Cleanup unused images
-              run: |
-                  export AWS_PAGER=cat
-                  arr=$(aws ecr describe-images --repository-name $APPLICATION_NAME --no-paginate | jq -r '.imageDetails |= sort_by(.imagePushedAt) | .imageDetails[0:-2] | .[].imageDigest')
-                  toDelete=$(node -e "console.log(process.argv[1].split('\n').filter(x => x.trim() !== '').map(x => 'imageDigest=' + x).join(' '))" "${arr[*]}")
-                  if [[ "$toDelete" -eq "" ]]; then
-                    echo "no old images to delete from ECS."
-                    exit 0
-                  fi
-
-                  echo "deleting: $toDelete"
-                  aws ecr --no-paginate batch-delete-image --repository-name $APPLICATION_NAME --image-ids $toDelete
+            - name: Cleanup old ECR Images
+              uses: alex-zissis/workflows/.github/actions/cleanup-ecr-images@develop
+              with:
+                  ecr-repository-name: ${{ inputs.application-name }}

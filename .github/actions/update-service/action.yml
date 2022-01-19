@@ -1,0 +1,18 @@
+name: 'Update ECS Service'
+description: 'Updates an ECR service to force a new deployment'
+inputs:
+  application-name:
+    description: "Name of the application container"
+    required: true
+  ecs-cluster:
+    description: "ECS Cluster short name" 
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: ${{ github.action_path }}/script.sh
+      id: main
+      env:
+         APPLICATION_NAME: ${{ inputs.application-name }}
+         ECS_CLUSTER: ${{ inputs.ecs-cluster }}
+      shell: bash

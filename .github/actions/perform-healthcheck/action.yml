@@ -1,0 +1,18 @@
+name: 'Update ECS Service'
+description: 'Updates an ECR service to force a new deployment'
+inputs:
+  sha:
+    description: "Github SHA to test for"
+    required: true
+  healthcheck-url:
+    description: "URL to call" 
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: ${{ github.action_path }}/script.sh
+      id: main
+      env:
+         SHA: ${{ inputs.sha }}
+         HEALTHCHECK_URL: ${{ inputs.healthcheck-url }}
+      shell: bash

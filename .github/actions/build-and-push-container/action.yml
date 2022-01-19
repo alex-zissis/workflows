@@ -1,0 +1,26 @@
+name: 'Build and push to ECR'
+description: 'Build a docker container and pushes it to ECR'
+inputs:
+  image-tag:  # id of input
+    description: Tag for the image. Usually you'll want the GIT SHA
+    required: true
+  application-name:
+    description: "Name of the application container"
+    required: true
+  ecr-registry:
+    description: "URL of the ecr repoistory" 
+    required: true
+outputs:
+  image:
+    description: "Docker image"
+    value: ${{ steps.main.outputs.image }}
+runs:
+  using: "composite"
+  steps:
+    - run: ${{ github.action_path }}/script.sh
+      id: main
+      env:
+         IMAGE_TAG: ${{ inputs.image-tag }}
+         APPLICATION_NAME: ${{ inputs.application-name }}
+         ECR_REGISTRY: ${{ inputs.ecr-registry }}
+      shell: bash
