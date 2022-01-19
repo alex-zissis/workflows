@@ -19,7 +19,7 @@ runs:
   steps:
     - run: ${{ github.action_path }}/script.sh
       id: main
-      with:
+      env:
          IMAGE_TAG: ${{ inputs.image-tag }}
          APPLICATION_NAME: ${{ inputs.application-name }}
          ECR_REGISTRY: ${{ inputs.ecr-registry }}
