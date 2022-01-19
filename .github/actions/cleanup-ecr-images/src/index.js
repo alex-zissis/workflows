@@ -31,12 +31,12 @@ const client = new ECRClient();
             deleteResponse.failures.forEach(({imageId, failureCode, failureReason}) =>
                 core.warning(`failed to delete ${imageId}: (${failureCode}) - ${failureReason}`)
             );
-            core.log(`Successfully deleted ${deleteResponse.imageIds.length}`);
+            core.info(`Successfully deleted ${deleteResponse.imageIds.length}`);
             deleteResponse.imageIds.forEach(({imageDigest, imageTag}) =>
                 core.debug(`Deleted image: ${imageDigest} ${imageTag}`)
             );
         } else {
-            core.log('Nothing to delete');
+            core.info('Nothing to delete');
         }
     } catch (error) {
         core.setFailed(error.message);
