@@ -46,6 +46,7 @@ jobs:
               uses: aws-actions/amazon-ecr-login@v1
 
             - name: Build, tag, and push image to Amazon ECR
+              uses: ubuntu-latest
               id: build-image
               with: 
                   IMAGE_TAG: ${{ inputs.image-tag }}
@@ -63,6 +64,7 @@ jobs:
                   echo "::set-output name=image::$ECR_REGISTRY/$APPLICATION_NAME:$IMAGE_TAG"
 
             - name: Update service
+              uses: ubuntu-latest
               with:
                 ECS_CLUSER: ${{ inputs.ecs-cluster }}
                 APPLICATION_NAME: ${{ inputs.application-name }}
@@ -71,6 +73,7 @@ jobs:
                   echo "Service ${APPLICATION_NAME} on cluster ${ECS_CLUSTER} updated"
 
             - name: Healthcheck
+              uses: ubuntu-latest
               with:
                   SHA: ${{ inputs.image-tag }}
                   HEALTHCHECK_URL: ${{ inputs.healthcheck-url }}
@@ -96,6 +99,7 @@ jobs:
                   echo "Success: SHA recieved - ${SHA}"
 
             - name: Cleanup unused images
+              uses: ubuntu-latest
               run: |
                   export AWS_PAGER=cat
                   arr=$(aws ecr describe-images --repository-name $APPLICATION_NAME --no-paginate | jq -r '.imageDetails |= sort_by(.imagePushedAt) | .imageDetails[0:-2] | .[].imageDigest')
