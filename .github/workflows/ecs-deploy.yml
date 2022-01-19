@@ -49,7 +49,6 @@ jobs:
               with: 
                   IMAGE_TAG: ${{ inputs.image-tag }}
                   APPLICATION_NAME: ${{ inputs.application-name }}
-              env:
                   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
               run: |
                   echo $IMAGE_TAG
