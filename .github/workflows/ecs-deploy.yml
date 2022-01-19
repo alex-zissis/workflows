@@ -45,6 +45,7 @@ jobs:
               uses: aws-actions/amazon-ecr-login@v1
 
             - name: Build, tag, and push image to Amazon ECR
+              uses: ubuntu-latest
               id: build-image
               with: 
                   IMAGE_TAG: ${{ inputs.image-tag }}
