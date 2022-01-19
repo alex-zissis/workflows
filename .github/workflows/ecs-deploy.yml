@@ -68,15 +68,7 @@ jobs:
                   sha: ${{ inputs.image-tag }}
                   healthcheck-url: ${{ inputs.healthcheck-url }}
 
-            # - name: Cleanup unused images
-            #   run: |
-            #       export AWS_PAGER=cat
-            #       arr=$(aws ecr describe-images --repository-name $APPLICATION_NAME --no-paginate | jq -r '.imageDetails |= sort_by(.imagePushedAt) | .imageDetails[0:-2] | .[].imageDigest')
-            #       toDelete=$(node -e "console.log(process.argv[1].split('\n').filter(x => x.trim() !== '').map(x => 'imageDigest=' + x).join(' '))" "${arr[*]}")
-            #       if [[ "$toDelete" -eq "" ]]; then
-            #         echo "no old images to delete from ECS."
-            #         exit 0
-            #       fi
-
-            #       echo "deleting: $toDelete"
-            #       aws ecr --no-paginate batch-delete-image --repository-name $APPLICATION_NAME --image-ids $toDelete
+            - name: Cleanup old ECR Images
+              uses: alex-zissis/workflows/.github/actions/cleanup-ecr-images@develop
+              with:
+                  ecr-repository-name: ${{ inputs.application-name }}
