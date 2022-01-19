@@ -30864,28 +30864,77 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
 (() => {
-const core = __nccwpck_require__(2186);
-const github = __nccwpck_require__(5438);
-const {ECRClient, DescribeImagesCommand, BatchDeleteImageCommand} = __nccwpck_require__(8923);
-const client = new ECRClient();
+"use strict";
+__nccwpck_require__.r(__webpack_exports__);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5438);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _aws_sdk_client_ecr__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(8923);
+/* harmony import */ var _aws_sdk_client_ecr__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_client_ecr__WEBPACK_IMPORTED_MODULE_2__);
+
+
+
+
+const client = new _aws_sdk_client_ecr__WEBPACK_IMPORTED_MODULE_2__.ECRClient({});
 
 (async () => {
     try {
-        const repositoryName = core.getInput('ecr-repository-name');
+        const repositoryName = _actions_core__WEBPACK_IMPORTED_MODULE_0___default().getInput('ecr-repository-name');
 
-        const describeCommand = new DescribeImagesCommand({repositoryName, maxResults: 1000});
+        const describeCommand = new _aws_sdk_client_ecr__WEBPACK_IMPORTED_MODULE_2__.DescribeImagesCommand({repositoryName, maxResults: 1000});
         const describeResponse = await client.send(describeCommand);
 
         if (!describeResponse.imageDetails) {
-            core.warning('Unable to query the repo. This may be a problem.');
+            _actions_core__WEBPACK_IMPORTED_MODULE_0___default().warning('Unable to query the repo. This may be a problem.');
             return;
         }
 
@@ -30896,24 +30945,24 @@ const client = new ECRClient();
         if (imagesInAscendingOrder.length > 2) {
             const imagesToDelete = imagesInAscendingOrder
                 .slice(0, -2)
-                .map((image) => ({imageDigest: `imageDigest=${image.imageDigest}`}));
-            const deleteCommand = new BatchDeleteImageCommand({
+                .map(({imageDigest}) => ({imageDigest}));
+            const deleteCommand = new _aws_sdk_client_ecr__WEBPACK_IMPORTED_MODULE_2__.BatchDeleteImageCommand({
                 repositoryName,
                 imageIds: imagesToDelete,
             });
             const deleteResponse = await client.send(deleteCommand);
             deleteResponse.failures.forEach(({imageId, failureCode, failureReason}) =>
-                core.warning(`failed to delete ${imageId}: (${failureCode}) - ${failureReason}`)
+                _actions_core__WEBPACK_IMPORTED_MODULE_0___default().warning(`failed to delete ${imageId}: (${failureCode}) - ${failureReason}`)
             );
-            core.info(`Successfully deleted ${deleteResponse.imageIds.length}`);
+            _actions_core__WEBPACK_IMPORTED_MODULE_0___default().info(`Successfully deleted ${deleteResponse.imageIds.length}`);
             deleteResponse.imageIds.forEach(({imageDigest, imageTag}) =>
-                core.debug(`Deleted image: ${imageDigest} ${imageTag}`)
+                _actions_core__WEBPACK_IMPORTED_MODULE_0___default().debug(`Deleted image: ${imageDigest} ${imageTag}`)
             );
         } else {
-            core.info('Nothing to delete');
+            _actions_core__WEBPACK_IMPORTED_MODULE_0___default().info('Nothing to delete');
         }
     } catch (error) {
-        core.setFailed(error.message);
+        _actions_core__WEBPACK_IMPORTED_MODULE_0___default().setFailed(error.message);
     }
 })();
 
