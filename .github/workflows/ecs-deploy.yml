@@ -18,6 +18,10 @@ on:
             healthcheck-url:
                 required: true
                 type: string
+            ecr-registry:
+                required: true
+                type: string
+
         secrets:
             aws-access-key-id:
                 required: true
