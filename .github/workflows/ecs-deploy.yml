@@ -45,7 +45,7 @@ jobs:
               uses: actions/checkout@v2
 
             - name: Build, tag, and push image to Amazon ECR
-              uses: ./github/actions/build-and-push-container
+              uses: alex-zissis/workflows/.github/actions/build-and-push-container@develop
               id: build-image
               with:
                   image-tag: ${{ inputs.image-tag }}
@@ -53,13 +53,13 @@ jobs:
                   ecr-registry: ${{ inputs.ecr-registry }}
 
             - name: Update service
-              uses: ./.github/actions/update-service
+              uses: alex-zissis/workflows/.github/actions/update-service@develop
               with:
                   ecs-cluster: ${{ inputs.ecs-cluster }}
                   application-name: ${{ inputs.application-name }}
 
             - name: Healthcheck
-              uses: ./.github/actions/perform-healthcheck
+              uses: alex-zissis/workflows/.github/actions/perform-healthcheck@develop
               with:
                   sha: ${{ inputs.image-tag }}
                   healthcheck-url: ${{ inputs.healthcheck-url }}
