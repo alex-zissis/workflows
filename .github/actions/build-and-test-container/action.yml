@@ -11,6 +11,10 @@ inputs:
     description: Port the container is exposing
     default: "3000"
     required: true 
+  app-path:
+    description: Directory the application lives in
+    required: false
+    default: .
 runs:
   using: "composite"
   steps:
@@ -20,4 +24,5 @@ runs:
          APPLICATION_NAME: ${{ inputs.application-name }}
          RUN_TESTS: ${{ inputs.run-tests }}
          PORT: ${{ inputs.container-port }}
+         APP_PATH: ${{ inputs.app-path }}
       shell: bash

@@ -1,4 +1,7 @@
 #!/bin/sh
+
+cd $APP_PATH
+
 if [[ "$RUN_TESTS" -eq "1" ]]; then
     docker build -t $APPLICATION_NAME:latest . --target test
 fi
