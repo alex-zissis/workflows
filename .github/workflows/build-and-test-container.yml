@@ -28,7 +28,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
             - name: Build and test docker image
-              uses: alex-zissis/workflows/.github/actions/build-and-test-container@develop
+              uses: alex-zissis/workflows/.github/actions/build-and-test-container@master
               with:
                   run-tests: ${{ inputs.run-tests }}
                   application-name: ${{ inputs.application-name }}
