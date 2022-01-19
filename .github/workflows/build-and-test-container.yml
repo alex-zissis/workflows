@@ -1,0 +1,36 @@
+name: PR Checks
+
+on:
+    workflow_call:
+        inputs:
+            application-name:
+                required: true
+                type: string
+            run-tests:
+                required: false
+                type: string
+                default: '1'
+            container-port:
+                required: false
+                type: string
+                default: '3000'
+            app-path:
+                required: false
+                type: string
+                default: .
+
+jobs:
+    build-and-test:
+        name: Build and test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+            - name: Build and test docker image
+              uses: alex-zissis/workflows/.github/actions/build-and-test-container@master
+              with:
+                  run-tests: ${{ inputs.run-tests }}
+                  application-name: ${{ inputs.application-name }}
+                  container-port: ${{ inputs.container-port }}
+                  app-path: ${{ inputs.app-path }}
