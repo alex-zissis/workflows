@@ -19,7 +19,7 @@ const client = new ECRClient();
             a.imagePushedAt > b.imagePushedAt ? 1 : b.imagePushedAt > a.imagePushedAt ? -1 : 0
         );
 
-        if (imagesInAscendingOrder > 2) {
+        if (imagesInAscendingOrder.length > 2) {
             const imagesToDelete = imagesInAscendingOrder
                 .slice(0, -2)
                 .map((image) => ({imageDigest: `imageDigest=${image.imageDigest}`}));
