@@ -12,7 +12,7 @@ runs:
   steps:
     - run: ${{ github.action_path }}/script.sh
       id: main
-      with:
+      env:
          APPLICATION_NAME: ${{ inputs.application-name }}
          ECS_CLUSTER: ${{ inputs.ecs-cluster }}
       shell: bash
