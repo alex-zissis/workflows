@@ -1,7 +1,8 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
-const {ECRClient, DescribeImagesCommand, BatchDeleteImageCommand} = require('@aws-sdk/client-ecr');
-const client = new ECRClient();
+import core from '@actions/core';
+import github from '@actions/github';
+import {ECRClient, DescribeImagesCommand, BatchDeleteImageCommand} from '@aws-sdk/client-ecr';
+
+const client = new ECRClient({});
 
 (async () => {
     try {
@@ -22,7 +23,7 @@ const client = new ECRClient();
         if (imagesInAscendingOrder.length > 2) {
             const imagesToDelete = imagesInAscendingOrder
                 .slice(0, -2)
-                .map((image) => ({imageDigest: `imageDigest=${image.imageDigest}`}));
+                .map(({imageDigest}) => ({imageDigest}));
             const deleteCommand = new BatchDeleteImageCommand({
                 repositoryName,
                 imageIds: imagesToDelete,
