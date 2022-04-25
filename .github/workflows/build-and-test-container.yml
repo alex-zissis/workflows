@@ -44,7 +44,7 @@ jobs:
                   app-path: ${{ inputs.app-path }}
 
             - name: Build and test docker image
-              uses: alex-zissis/workflows/.github/actions/build-and-test-container@master
+              uses: alex-zissis/workflows/.github/actions/build-and-test-container@develop
               with:
                   run-tests: ${{ inputs.run-tests }}
                   application-name: ${{ inputs.application-name }}
