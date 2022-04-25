@@ -15,14 +15,22 @@ inputs:
     description: Directory the application lives in
     required: false
     default: .
+  build-script:
+    required: false
+    type: string
+  run-script:
+    required: false
+    type: string
 runs:
   using: "composite"
   steps:
     - run: ${{ github.action_path }}/script.sh
       id: main
       env:
-         APPLICATION_NAME: ${{ inputs.application-name }}
-         RUN_TESTS: ${{ inputs.run-tests }}
-         PORT: ${{ inputs.container-port }}
-         APP_PATH: ${{ inputs.app-path }}
+          APPLICATION_NAME: ${{ inputs.application-name }}
+          RUN_TESTS: ${{ inputs.run-tests }}
+          PORT: ${{ inputs.container-port }}
+          APP_PATH: ${{ inputs.app-path }}
+          BUILD_SCRIPT: ${{ inputs.build-script }}
+          RUN_SCRIPT: ${{ inputs.run-script }}
       shell: bash

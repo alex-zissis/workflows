@@ -18,6 +18,12 @@ on:
                 required: false
                 type: string
                 default: .
+            build-script:
+                required: false
+                type: string
+            run-script:
+                required: false
+                type: string
 
 jobs:
     build-and-test:
@@ -34,3 +40,5 @@ jobs:
                   application-name: ${{ inputs.application-name }}
                   container-port: ${{ inputs.container-port }}
                   app-path: ${{ inputs.app-path }}
+                  build-script: ${{ inputs.build-script }}
+                  run-script: ${{ inputs.run-script }}
