@@ -24,6 +24,10 @@ on:
             run-script:
                 required: false
                 type: string
+            env-string:
+                required: false
+                type: string
+                default: ""
 
 jobs:
     build-and-test:
@@ -33,6 +37,12 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v2
+            - name: Setup .env file
+              uses: alex-zissis/workflows/.github/actions/setup-env-file@develop
+              with:
+                  env-string: ${{ inputs.env-string }}
+                  app-path: ${{ inputs.app-path }}
+
             - name: Build and test docker image
               uses: alex-zissis/workflows/.github/actions/build-and-test-container@master
               with:

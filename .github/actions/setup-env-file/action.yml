@@ -1,0 +1,19 @@
+name: Setup .env file
+description: Takes a string of key value pair, and saves them into a .env file
+inputs:
+  env-string:
+    description: string of key value pairs of environment variables. Newline delimited.
+    required: true
+  app-path:
+    description: Directory the application lives in
+    required: false
+    default: .
+runs:
+  using: "composite"
+  steps:
+    - run: ${{ github.action_path }}/script.sh
+      id: main
+      env:
+          ENV_STRING: ${{ inputs.env-string }}
+          APP_PATH: ${{ inputs.app-path }}
+      shell: bash
